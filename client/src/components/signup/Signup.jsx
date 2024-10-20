@@ -7,7 +7,6 @@ import classes from './signup.module.css'
 import { register } from '../../redux/authSlice'
 import { request } from '../../util/fetchAPI'
 
-
 const Signup = () => {
   const [state, setState] = useState({})
   const [photo, setPhoto] = useState("")
@@ -26,12 +25,13 @@ const Signup = () => {
   const handleRegister = async (e) => {
     e.preventDefault()
 
-    // how to check if ONLY ONE of the values of an object is empty
+    // Check if any field is empty
     if (Object.values(state).some((v) => v === '')) {
       setEmptyFields(true)
       setTimeout(() => {
         setEmptyFields(false)
       }, 2500)
+      return
     }
 
     try {
@@ -42,6 +42,7 @@ const Signup = () => {
         formData.append('filename', filename)
         formData.append('image', photo)
 
+        // Fetch to upload image
         await fetch(`http://localhost:5000/upload/image`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -49,20 +50,15 @@ const Signup = () => {
           method: 'POST',
           body: formData
         })
-      } else {
-        setEmptyFields(true)
-        setTimeout(() => {
-          setEmptyFields(false)
-        }, 2500)
-        return
       }
 
       const headers = {
         "Content-Type": "application/json",
+        'Authorization': `Bearer ${token}`  // Ensure token is passed
       }
 
+      // Register user request
       const data = await request(`/auth/register`, "POST", headers, { ...state, profileImg: filename })
-
 
       dispatch(register(data))
       navigate("/")
